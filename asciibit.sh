@@ -14,21 +14,25 @@
 #
 # Converts from ASCII string to binary string
 # (0s or 1s only, no prefix/sulfix b)
-# @param {string} input
+# @param {string} input || <filename
 # @returns {string}
 #
 function ascii_bin() {
-  printf %s "$1" | xxd -b | cut -d' ' -f2-7 | tr -d ' \n'
+  local data
+  ((${#1} > 0)) && data="$1" || IFS= read -rd '' data <&0
+  printf %s "$data" | xxd -b -g0 | cut -d' ' -f2 | tr -d ' \n'
 }
 
 #
 # Converts from ASCII string to hex string
 # (lowercase, no prefix/sulfix x or h)
-# @param {string} input
+# @param {string} input || <filename
 # @returns {string}
 #
 function ascii_hex() {
-  printf %s "$1" | xxd -p | tr -d \\n
+  local data
+  ((${#1} > 0)) && data="$1" || IFS= read -rd '' data <&0
+  printf %s "$data" | xxd -p | tr -d \\n
 }
 
 #
@@ -42,7 +46,7 @@ function bin_ascii() {
   ((size % 8 < 1)) && pad=0 || pad=$((8 - size % 8))
   ((pad > 0)) && data="$(printf %0${pad}g 0)$1" || data=$1
 
-  x2ascii "$(bc <<<"obase=16; ibase=2; $data" | tr '[:upper:]' '[:lower:]' | tr -d \\n)"
+  hex_ascii "$(bc <<<"obase=16; ibase=2; $data" | tr '[:upper:]' '[:lower:]' | tr -d \\n)"
 }
 
 #
