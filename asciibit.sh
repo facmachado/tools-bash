@@ -19,7 +19,11 @@
 #
 function ascii_bin() {
   local data
-  ((${#1} > 0)) && data="$1" || IFS= read -rd '' data <&0
+  if ((${#1} > 0)); then
+    data="$1"
+  else
+    IFS= read -rd '' data <&0
+  fi
   printf %s "$data" | xxd -b -g0 | cut -d' ' -f2 | tr -d ' \n'
 }
 
@@ -31,7 +35,11 @@ function ascii_bin() {
 #
 function ascii_hex() {
   local data
-  ((${#1} > 0)) && data="$1" || IFS= read -rd '' data <&0
+  if ((${#1} > 0)); then
+    data="$1"
+  else
+    IFS= read -rd '' data <&0
+  fi
   printf %s "$data" | xxd -p | tr -d \\n
 }
 
