@@ -46,7 +46,7 @@ function bin_ascii() {
   ((size % 8 < 1)) && pad=0 || pad=$((8 - size % 8))
   ((pad > 0)) && data="$(printf %0${pad}g 0)$1" || data=$1
 
-  hex_ascii "$(bc <<<"obase=16; ibase=2; $data" | tr '[:upper:]' '[:lower:]' | tr -d \\n)"
+  hex_ascii "$(bc <<<"obase=16; ibase=2; $data")"
 }
 
 #
