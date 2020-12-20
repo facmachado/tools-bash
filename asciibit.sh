@@ -14,32 +14,26 @@
 #
 # Converts from ASCII string to binary string
 # (0s or 1s only, no prefix/sulfix b)
-# @param {string} input || <filename
+# @param {string} input or <file
 # @returns {string}
 #
 function ascii_bin() {
   local data
-  if ((${#1} > 0)); then
-    data="$1"
-  else
-    IFS= read -rd '' data <&0
-  fi
+  if ((${#1} > 0)); then data="$1"; else IFS= read -rd '' data <&0; fi
+
   printf %s "$data" | xxd -b -g0 | cut -d' ' -f2 | tr -d ' \n'
 }
 
 #
 # Converts from ASCII string to hex string
 # (lowercase, no prefix/sulfix x or h)
-# @param {string} input || <filename
+# @param {string} input or <file
 # @returns {string}
 #
 function ascii_hex() {
   local data
-  if ((${#1} > 0)); then
-    data="$1"
-  else
-    IFS= read -rd '' data <&0
-  fi
+  if ((${#1} > 0)); then data="$1"; else IFS= read -rd '' data <&0; fi
+
   printf %s "$data" | xxd -p | tr -d \\n
 }
 
