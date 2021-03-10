@@ -1,19 +1,19 @@
 #!/bin/bash
 
 #
-#  wol.sh - Wake-up-on-lan functions library
+#  wol.sh - wake-on-lan functions library
 #
 #  Copyright (c) 2021 Flavio Augusto (@facmachado)
 #
 #  This software may be modified and distributed under the terms
 #  of the MIT license. See the LICENSE file for details.
 #
-#  Usage: source asciibit.sh
+#  Usage: source ascii.sh
 #         source wol.sh
 #
 
 #
-# Check for netcat
+# Checks for netcat
 #
 if [ ! "$(command -v nc)" ]; then
   echo 'Error: netcat not installed' >&2
@@ -30,12 +30,12 @@ function wol_send() {
   mac=$1
   port=9
 
-  nc -w1 -u -b $bc $port < <(wol_str $mac)
+  nc -w1 -u -b $bc $port < <(wol_str "$mac")
 }
 
 #
 # Converts from MAC address to Magic Packet string
-# @param {string} input
+# @param {string} mac
 # @returns {string}
 #
 function wol_str() {

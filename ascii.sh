@@ -1,18 +1,18 @@
 #!/bin/bash
 
 #
-#  asciibit.sh - ASCII strings functions library
+#  ascii.sh - ASCII strings functions library
 #
 #  Copyright (c) 2021 Flavio Augusto (@facmachado)
 #
 #  This software may be modified and distributed under the terms
 #  of the MIT license. See the LICENSE file for details.
 #
-#  Usage: source asciibit.sh
+#  Usage: source ascii.sh
 #
 
 #
-# Check for xxd
+# Checks for xxd
 #
 if [ ! "$(command -v xxd)" ]; then
   echo 'Error: xxd not installed' >&2
