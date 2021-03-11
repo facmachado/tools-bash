@@ -1,89 +1,61 @@
 #!/bin/bash
 
 #
-#  hexorg.sh - hexdump with the right of setting the real origin address
+#  hexorg.sh - file hexdump with real origin address settable
 #              (good for use with retrocomputing)
 #
-#  Copyright (c) 2020 Flavio Augusto (@facmachado)
+#  Copyright (c) 2021 Flavio Augusto (@facmachado)
 #
 #  This software may be modified and distributed under the terms
 #  of the MIT license. See the LICENSE file for details.
 #
 
 #
-# Declare some vars
+# Checks some dependencies
 #
-HD=$(command -v hexdump)
-LESS=$(command -v less)
-THIS=$(basename "$0")
-
-#
-# Check some dependencies
-#
-if (($(tput cols) < 90 || $(tput lines) < 10)); then
-  echo 'Error: Console below 90 columns x 10 lines' >&2
+if (($(tput cols) < 80 || $(tput lines) < 10)); then
+  echo 'Error: Console screen below 80 columns x 10 lines' >&2
   exit 1
-elif [ ! "$LESS" ]; then
+elif [ ! "$(command -v less)" ]; then
   echo 'Error: less not installed' >&2
   exit 1
-elif [ ! "$HD" ]; then
-  echo 'Error: hexdump not installed' >&2
+elif [ ! "$(command -v xxd)" ]; then
+  echo 'Error: xxd not installed' >&2
   exit 1
 fi
 
 #
-# Help
+# Shows help
 #
-function help() {
-  echo "Usage: $THIS <-f|-i file> [-o hex_addr]"
-  exit 0
+function usage() {
+  echo "Usage: $(basename "$0") <-f file> [-o hex_addr]"
 }
 
 #
-# Check some args and if file exists
+# Checks args
 #
 while (("$#")); do
   case $1 in
-    -o) ORG=$((0x$(sed 's/[^0-9a-f]//g' <<<"$2"))) ;;
-    -f|-i) FILE=$2 ;;
-    *) help ;;
+    -f)  file=$2                                  ;;
+    -o)  org=${2:-0} && org=0x${org//[^0-9a-f]/}  ;;
+    *)   usage && exit 0                          ;;
   esac
   shift 2
 done
-test ! "$FILE" && help
-if [ ! -f "$FILE" ]; then
+
+#
+# Checks if file exists
+#
+if [ ! "$file" ]; then
+  usage && exit 0
+elif [ ! -f "$file" ]; then
   echo 'Error: file not found' >&2
   exit 1
 fi
 
 #
-# Start
+# Opens file for analysis
 #
-echo "Hex dumping, please wait... (Use 'q' to exit next screen)"
-T1="/tmp/$(basename "$FILE").tmp"
-T0="/tmp/$THIS.tmp"
-
-#
-# Hexdump to pre-target
-#
-$HD -Cv "$FILE" >"$T0" 2>/dev/null
-
-#
-# Inject addresses before hexdump lines
-#
-while IFS= read -r i; do
-  line=$((0x$(awk '{ print $1 }' <<<"$i")))
-  line=$((line + ORG))
-  printf '\e[1;97m%0.8x\e[0m  \e[2;37m%s\e[0m\n' "$line" "$i"
-done <"$T0" >"$T1"
-
-#
-# Open target for analysis
-#
-clear && $LESS -KRP"--ADDR--  (Q) QUIT  00 01 02 03 04 05 06 07  \
-08 09 0a 0b 0c 0d 0e 0f  |0123456789abcdef|" "$T1"
-
-#
-# Delete temps. End
-#
-rm -f "$T0" "$T1" &
+xxd -g1 -o "$org" "$file" | less -KRP "(Q) QUIT  \
+00 01 02 03 04 05 06 07 08 09 0a 0b 0c 0d 0e 0f  \
+0123456789abcdef"
