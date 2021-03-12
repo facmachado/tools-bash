@@ -40,7 +40,7 @@ function wol_send() {
 #
 function wol_str() {
   local mac magic
-  mac=$(printf %s "$1" | tr '[:upper:]' '[:lower:]' | tr -d ' :-')
+  mac=$(printf %s "${1,,}" | tr -d ' :-')
   magic=$(printf f%.0s {1..12}; printf "${mac}%.0s" {1..16})
 
   hex_ascii "$magic"
