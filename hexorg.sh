@@ -25,17 +25,17 @@ elif [ ! "$(command -v xxd)" ]; then
 fi
 
 #
-# Checks if minimum argument is defined
+# Checks if one or two arguments are defined
 #
-if ((${#*} < 1)); then
-  echo "Usage: $(basename "$0") <file> [hex_addr]"
+if ((${#*} < 1 || ${#*} > 2)); then
+  echo "Usage: $(basename "$0") <file|-> [hex_addr]"
   exit 1
 fi
 
 #
-# Checks if file exists
+# Checks if file (or stdin) exists
 #
-if [ ! -f "$1" ]; then
+if [ ! -f "$1" -a "$1" != '-' ]; then
   echo 'Error: file not found' >&2
   exit 1
 fi
