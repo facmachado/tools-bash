@@ -22,7 +22,7 @@ fi
 #
 function check() {
   sleep 0.1
-  printf '\r\033[1;32m✓\033[0m\n'
+  echo -e '\r\033[1;32m✓\033[0m'
 }
 
 #
@@ -51,15 +51,15 @@ function oneTimeTearDown() {
 #
 
 function testSource() {
-  printf '. source ascii.sh '
+  printf %s '. source ascii.sh '
   source "$src_dir/ascii.sh"
   assertEquals 'ascii.sh' 0 $? && check
 
-  printf '. source random.sh '
+  printf %s '. source random.sh '
   source "$src_dir/random.sh"
   assertEquals 'random.sh' 0 $? && check
 
-  printf '. source wol.sh '
+  printf %s '. source wol.sh '
   source "$src_dir/wol.sh"
   assertEquals 'wol.sh' 0 $? && check
 }
@@ -67,19 +67,19 @@ function testSource() {
 function testAscii() {
   local result
 
-  printf '. ascii_bin 123456 '
+  printf %s '. ascii_bin 123456 '
   result=$(ascii_bin 123456)
   assertEquals 'ascii_bin 123456' 001100010011001000110011001101000011010100110110 "$result" && check
 
-  printf '. ascii_hex 123456 '
+  printf %s '. ascii_hex 123456 '
   result=$(ascii_hex 123456)
   assertEquals 'ascii_hex 123456' 313233343536 "$result" && check
 
-  printf '. bin_ascii 001100010011001000110011001101000011010100110110 '
+  printf %s '. bin_ascii 001100010011001000110011001101000011010100110110 '
   result=$(bin_ascii 001100010011001000110011001101000011010100110110)
   assertEquals 'bin_ascii 001100010011001000110011001101000011010100110110' 123456 "$result" && check
 
-  printf '. hex_ascii 313233343536 '
+  printf %s '. hex_ascii 313233343536 '
   result=$(hex_ascii 313233343536)
   assertEquals 'hex_ascii 313233343536' 123456 "$result" && check
 }
@@ -87,35 +87,35 @@ function testAscii() {
 function testRandom() {
   local result
 
-  printf '. random_hash 8 2 '
+  printf %s '. random_hash 8 2 '
   result=$(random_hash 8 2)
   assertNotContains 'random_hash 8 2' "$result" 2 && check
-  printf '. random_hash 4 8 '
+  printf %s '. random_hash 4 8 '
   result=$(random_hash 4 8)
   assertNotContains 'random_hash 4 8' "$result" 9 && check
-  printf '. random_hash 5 10 '
+  printf %s '. random_hash 5 10 '
   result=$(random_hash 5 10)
   assertNotContains 'random_hash 5 10' "$result" a && check
-  printf '. random_hash 2 16 '
+  printf %s '. random_hash 2 16 '
   result=$(random_hash 2 16)
   assertNotContains 'random_hash 2 16' "$result" g && check
 
-  printf '. random_word 12 '
+  printf %s '. random_word 12 '
   result=$(random_word 12 | wc -c)
   assertTrue 'random_word 12' "(($result <= 12))" && check
 
-  printf '. random_draw 1000 1 '
+  printf %s '. random_draw 1000 1 '
   random_draw 1000 1 >/dev/null
   assertEquals 'random_draw 1000 1' 0 $? && check
-  printf '. random_draw 1000 -1 '
+  printf %s '. random_draw 1000 -1 '
   random_draw 1000 -1 >/dev/null
   assertEquals 'random_draw 1000 -1' 0 $? && check
 
-  printf '. random_guid '
+  printf %s '. random_guid '
   result=$(random_guid)
   assertContains 'random_guid' "$result" '-' && check
 
-  printf '. random_mac '
+  printf %s '. random_mac '
   result=$(random_mac)
   assertContains 'random_mac' "$result" ':' && check
 }
@@ -124,11 +124,11 @@ function testWol() {
   local mac result
   mac=$(random_mac)
 
-  printf ". wol_str $mac "
+  printf %s ". wol_str $mac "
   result=$(wol_str "$mac" | wc -c)
   assertEquals "wol_str $mac" 102 "$result" && check
 
-  printf ". wol_send $mac "
+  printf %s ". wol_send $mac "
   wol_send "$mac"
   assertEquals "wol_send $mac" 0 $? && check
 }
@@ -136,8 +136,8 @@ function testWol() {
 function testHexorg() {
   local result
 
-  printf '. call hexorg '
-  result=$(bash $src_dir/hexorg.sh)
+  printf %s '. call hexorg '
+  result=$(bash "$src_dir/hexorg.sh")
   assertContains 'call hexorg' "$result" 'Usage:' && check
 }
 
