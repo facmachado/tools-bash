@@ -85,6 +85,17 @@ function random_hash() { (
 ) }
 
 #
+# Generates a MAC address
+# @returns {string}
+#
+function random_mac() {
+  local addr
+  addr=$(random_hash 12 16)
+
+  printf %s "${addr:0:2}:${addr:2:2}:${addr:4:2}:${addr:6:2}:${addr:8:2}:${addr:10:2}"
+}
+
+#
 # Generates a random word, with some special characters
 # @param {number} limit
 # @returns {string}
