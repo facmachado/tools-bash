@@ -26,10 +26,11 @@ fi
 # @returns {string}
 #
 function ascii_bin() {
-  local data
-  if ((${#1} > 0)); then data="$1"; else IFS= read -rd '' data <&0; fi
-
-  printf %s "$data" | xxd -b -g0 | cut -d' ' -f2 | tr -d ' \n'
+  if ((${#1} > 0)); then
+    printf %s "$1" | xxd -b -g0 | cut -d' ' -f2 | tr -d ' \n'
+  else
+    xxd -b -g0 | cut -d' ' -f2 | tr -d ' \n'
+  fi
 }
 
 #
@@ -39,10 +40,11 @@ function ascii_bin() {
 # @returns {string}
 #
 function ascii_hex() {
-  local data
-  if ((${#1} > 0)); then data="$1"; else IFS= read -rd '' data <&0; fi
-
-  printf %s "$data" | xxd -p | tr -d \\n
+  if ((${#1} > 0)); then
+    printf %s "$1" | xxd -p | tr -d \\n
+  else
+    xxd -p | tr -d \\n
+  fi
 }
 
 #
