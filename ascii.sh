@@ -3,7 +3,7 @@
 #
 #  ascii.sh - ASCII strings functions library
 #
-#  Copyright (c) 2021 Flavio Augusto (@facmachado)
+#  Copyright (c) 2022 Flavio Augusto (@facmachado)
 #
 #  This software may be modified and distributed under the terms
 #  of the MIT license. See the LICENSE file for details.

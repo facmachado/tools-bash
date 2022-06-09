@@ -3,7 +3,7 @@
 #
 #  random.sh - random functions library
 #
-#  Copyright (c) 2021 Flavio Augusto (@facmachado)
+#  Copyright (c) 2022 Flavio Augusto (@facmachado)
 #
 #  This software may be modified and distributed under the terms
 #  of the MIT license. See the LICENSE file for details.
@@ -14,7 +14,7 @@
 #
 # Generates a number drawn, based on the quantity of tickets
 # (up to 18 digits) and the waiting time in seconds. Tip: A
-# negative value gives "more excitement" to the draw
+# negative time value gives "more excitement" to the draw
 # @param {number} qty
 # @param {number} time
 # @returns {string}
