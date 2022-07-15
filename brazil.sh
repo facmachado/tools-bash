@@ -13,6 +13,18 @@
 #
 
 #
+# Verifica se o curl e o jq estão instalados
+# (obrigatório para a função banco_nome())
+#
+if [ ! "$(command -v curl)" ]; then
+  echo 'Error: curl not installed' >&2
+  exit 1
+elif [ ! "$(command -v jq)" ]; then
+  echo 'Error: jq not installed' >&2
+  exit 1
+fi
+
+#
 # Fórmulas de cálculo do Digito verificador geral (DAC)
 # (General verifier 1-digit calculation formulas)
 # (Fonte/Source: Febraban [Brazilian Banks Federation] -
@@ -45,17 +57,22 @@ function modulo_10() {
 
 #
 # Módulo 11
-# Obs.: Para o CPF, o fator multiplicatório deverá ter o valor
-#       12, e para o CNPJ e boletos, o valor 9 (padrão)
+# Obs.: Para o CPF, o segundo parâmetro deverá ter o valor 12, para boletos
+#       de cobrança, o valor 10, e para o CNPJ e convênios, o valor 9 (padrão)
 # @param {string} numero
-# @param {number} fator (9|12)
+# @param {number} fator (9|10|12)
 # @return {number}
 #
 function modulo_11() {
-  local -i a b c d fator peso
+  local -i a b c d digito fator peso
   local -a arr0 arr1
+  digito=0  # Valor padrão do DAC
+  fator=9   # Fator multiplicatório
   peso=2
-  [[ "$2" == 12 ]] && fator=12 || fator=9
+  case "$2" in
+    12) fator=12 ;;
+    10) digito=1 ;;
+  esac
 
   arr0=("$(rev <<<"${1:-0}" | grep -o .)")
   for a in ${arr0[*]}; do
@@ -64,9 +81,61 @@ function modulo_11() {
   done
   for b in ${arr1[*]}; do c+=$b; done
   d=$((c % 11))
-  ((d > 1)) && d=$((11 - d)) || d=0
+  if ((d > 1 && d < 10)); then
+    d=$((11 - d))
+  elif ((d < 2)); then
+    d=$digito
+  else
+    d=1
+  fi
 
   printf %d $d
+}
+
+#
+# Funções auxiliares (para a boleto_info(), por exemplo)
+#
+
+#
+# Converte o fator de vencimento para Unix timestamp
+# @param {string} numero
+# @return {number}
+#
+function venc_utime() {
+  local -i b d f s
+  f=${1:-0}
+  d=86400
+
+  if ((f < 1000 || f > 9999)); then
+    echo 'O fator deve estar entre 1000 e 9999' >&2
+    return 1
+  fi
+
+  b=10141  # O timestamp de 07/10/1997 convertido para dias
+  while ((b + 9999 < $(date +%s -u) / d)); do b+=9000; done
+  s=$(((f + b) * d))
+
+  printf %d $s
+}
+
+#
+# Obtém o nome do banco pelo código que consta no boleto
+# @param {string} numero
+# @return {string}
+#
+function banco_nome() {
+  if ((${#1} < 1)); then
+    echo 'Informe o código do banco' >&2
+    return 1
+  fi
+
+  local c n q u
+  c=$(printf %03d "$1")
+  u='https://cdn.jsdelivr.net/gh/guibranco/BancosBrasileiros/data/bancos.json'
+  q='.[] | select(.COMPE == "'$c'") | .LongName'
+  n=$(curl -ks "$u" | jq "$q" | tr -d \")
+
+  printf %s "${n^^}"
 }
 
 #
@@ -218,10 +287,10 @@ function boleto_linha() {
   c1="${1:0:4}${1:19:1}.${1:20:4}"
   c2="${1:24:5}.${1:29:5}"
   c3="${1:34:5}.${1:39:5}"
-  c4="${1:4:1}"  # Digito verificador
-  c5="${1:5:14}" # Vencimento + Valor
+  c4="${1:4:1}"   # Digito verificador
+  c5="${1:5:14}"  # Vencimento + Valor
 
-  if (($(modulo_11 "${1:0:4}${1:5:39}") != c4)); then
+  if (($(modulo_11 "${1:0:4}${1:5:39}" 10) != c4)); then
     echo 'O código de barras é inválido' >&2
     return 1
   fi
@@ -231,6 +300,42 @@ function boleto_linha() {
   m3=$(modulo_10 "${c3//\./}")
 
   printf %s "$c1$m1 $c2$m2 $c3$m3 $c4 $c5"
+}
+
+function boleto_info() {
+  local c1 c2 c3 c4 c5 l
+  # shellcheck disable=SC2001
+  l=$(sed 's/[^0-9]//g' <<<"$@")
+  if ((${#l} != 47 && ${#l} != 44)); then
+    echo 'O código de barras é inválido' >&2
+    return 1
+  fi
+  ((${#l} == 47)) && l=$(boleto_barra "$l")
+
+  c1=${l:0:3}   # Código do banco
+  c2=${l:3:1}   # Moeda de emissão: BRL=9
+  c3=${l:4:1}   # Digito verificador
+  c4=${l:5:4}   # Vencimento
+  c5=${l:9:10}  # Valor
+
+  if [[ "$c4" == "0000" ]]; then
+    c4='N/D'
+  else
+    c4=$(date +%d/%m/%Y -ud @"$(venc_utime "$c4")")
+  fi
+
+  if [[ "$c5" == "0000000000" ]]; then
+    c5='N/D'
+  else
+    c5="${c5:0:8},${c5:8:2}"
+    c5=$(printf %\'.2f "${c5//^0*/}")
+  fi
+
+  cat <<EOF
+Banco:               $c1 - $(banco_nome "$c1")
+Data do vencimento:  $c4
+Valor a pagar:       $c5
+EOF
 }
 
 #
@@ -289,3 +394,8 @@ function convenio_linha() {
 
   printf %s "$c1-$m1 $c2-$m2 $c3-$m3 $c4-$m4"
 }
+
+# TODO: boleto_info e convenio_info
+# https://www.banrisul.com.br/bob/data/LeiauteBanrisulFebraban_pdr240_v103_31082021.pdf?cache=0
+# https://cmsarquivos.febraban.org.br/Arquivos/documentos/PDF/Layout%20-%20C%C3%B3digo%20de%20Barras%20ATUALIZADO.pdf
+# https://download.itau.com.br/bankline/cobranca_cnab240.pdf
