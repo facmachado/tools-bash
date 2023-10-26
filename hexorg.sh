@@ -4,7 +4,7 @@
 #  hexorg.sh - file hex dump with user-defined origin address (offset)
 #              (good for use with retrocomputing)
 #
-#  Copyright (c) 2022 Flavio Augusto (@facmachado)
+#  Copyright (c) 2023 Flavio Augusto (@facmachado, PP2SH)
 #
 #  This software may be modified and distributed under the terms
 #  of the MIT license. See the LICENSE file for details.
@@ -50,4 +50,4 @@ org=${org:-0}
 # Opens file for analysis with less
 #
 less -KRP "--ADDR--  00 01 02 03 04 05 06 07 08 09 0a 0b 0c 0d 0e 0f  \
-0123456789abcdef" < <(xxd -g1 -o "0x$org" "$1" 2>/dev/null)
+0123456789abcdef" < <(xxd -g1 -o "0x$org" "$1" 2>&-)

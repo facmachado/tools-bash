@@ -3,7 +3,7 @@
 #
 #  random.sh - random functions library
 #
-#  Copyright (c) 2022 Flavio Augusto (@facmachado)
+#  Copyright (c) 2023 Flavio Augusto (@facmachado, PP2SH)
 #
 #  This software may be modified and distributed under the terms
 #  of the MIT license. See the LICENSE file for details.
@@ -81,7 +81,7 @@ function random_hash() { (
     *)   echo -e "Base not valid!\\n$(usage)" >&2 && return 1  ;;
   esac
 
-  tr -dc $range </dev/urandom 2>/dev/null | head -c $size
+  tr -dc $range </dev/urandom 2>&- | head -c $size
 ) }
 
 #
@@ -109,5 +109,5 @@ function random_word() {
   fi
   size=$((RANDOM % limit + 1))
 
-  tr -dc '[:graph:]' </dev/urandom 2>/dev/null | head -c $size
+  tr -dc '[:graph:]' </dev/urandom 2>&- | head -c $size
 }

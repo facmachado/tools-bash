@@ -3,7 +3,7 @@
 #
 #  tools-bash_test.sh - testing environment for tools-bash
 #
-#  Copyright (c) 2022 Flavio Augusto (@facmachado)
+#  Copyright (c) 2023 Flavio Augusto (@facmachado, PP2SH)
 #
 #  This software may be modified and distributed under the terms
 #  of the MIT license. See the LICENSE file for details.
@@ -16,28 +16,14 @@ if [ ! "$(command -v shunit2)" ]; then
   echo 'Error: shunit2 not installed' >&2
   exit 1
 fi
-
-#
-# Defines task name
-#
-function task() {
-  echo -n ". $1 "
-}
-
-#
-# Marks task as successful
-#
-function check() {
-  sleep 0.1
-  echo -e '\r\033[1;32m✓\033[0m'
-}
+src_dir=$(dirname "${BASH_SOURCE[0]}")
+source "$src_dir/taskcheck.sh"
 
 #
 # Unit test common routines, like Selenium Webdriver
 #
 
 function oneTimeSetUp() {
-  readonly src_dir=$(dirname "${BASH_SOURCE[0]}")
   echo "Test start: $(date)"
 }
 
@@ -162,6 +148,53 @@ function testWol() {
   task 'wol_send'
   wol_send "$mac"
   assertEquals 'wol_send' 0 $? && \
+  check
+}
+
+function testBrazil() {
+  task 'modulo_10'
+  check
+
+  task 'modulo_11'
+  check
+
+  task 'venc_utime'
+  check
+
+  task 'banco_nome'
+  check
+
+  task 'cpf_dv'
+  check
+
+  task 'cpf_gerar'
+  check
+
+  task 'cpf_validar'
+  check
+
+  task 'cnpj_dv'
+  check
+
+  task 'cnpj_gerar'
+  check
+
+  task 'cnpj_validar'
+  check
+
+  task 'boleto_barra'
+  check
+
+  task 'boleto_linha'
+  check
+
+  task 'boleto_info'
+  check
+
+  task 'convenio_barra'
+  check
+
+  task 'convenio_linha'
   check
 }
 

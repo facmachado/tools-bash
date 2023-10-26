@@ -3,7 +3,7 @@
 #
 #  brazil.sh - brazil-specific functions library
 #
-#  Copyright (c) 2022 Flavio Augusto (@facmachado)
+#  Copyright (c) 2023 Flavio Augusto (@facmachado, PP2SH)
 #
 #  This software may be modified and distributed under the terms
 #  of the MIT license. See the LICENSE file for details.
@@ -327,8 +327,7 @@ function boleto_info() {
   if [[ "$c5" == "0000000000" ]]; then
     c5='N/D'
   else
-    c5="${c5:0:8},${c5:8:2}"
-    c5=$(printf %\'.2f "${c5//^0*/}")
+    c5=$(printf "%'.2f" "${c5:0:8},${c5:8:2}")
   fi
 
   cat <<EOF
