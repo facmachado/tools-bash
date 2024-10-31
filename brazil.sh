@@ -43,11 +43,13 @@ function modulo_10() {
   peso=2
 
   arr0=("$(rev <<<"${1:-0}" | grep -o .)")
+  # shellcheck disable=SC2048
   for a in ${arr0[*]}; do
     fila+=$((a * peso))
     ((peso == 2)) && peso=1 || peso=2
   done
   arr1=("$(grep -o . <<<"$fila")")
+  # shellcheck disable=SC2048
   for b in ${arr1[*]}; do c+=$b; done
   d=$((c % 10))
   ((d > 0)) && d=$((10 - d)) || d=0
@@ -75,10 +77,12 @@ function modulo_11() {
   esac
 
   arr0=("$(rev <<<"${1:-0}" | grep -o .)")
+  # shellcheck disable=SC2048
   for a in ${arr0[*]}; do
     ((peso > fator)) && peso=2
     arr1+=($((a * peso++)))
   done
+  # shellcheck disable=SC2048
   for b in ${arr1[*]}; do c+=$b; done
   d=$((c % 11))
   if ((d > 1 && d < 10)); then
@@ -189,7 +193,7 @@ function cpf_validar() {
   dv0=${1:9:2}
   dv1=$(cpf_dv "$nd")
 
-  if ((dv1 != dv0)); then
+  if test "$dv1" != "$dv0"; then
     echo 'CPF inválido' >&2
     return 1
   fi
@@ -240,7 +244,7 @@ function cnpj_validar() {
   dv0=${1:12:2}
   dv1=$(cnpj_dv "$nd")
 
-  if ((dv1 != dv0)); then
+  if test "$dv1" != "$dv0"; then
     echo 'CNPJ inválido' >&2
     return 1
   fi
