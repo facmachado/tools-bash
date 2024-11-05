@@ -193,7 +193,7 @@ function cpf_validar() {
   dv0=${1:9:2}
   dv1=$(cpf_dv "$nd")
 
-  if test "$dv1" != "$dv0"; then
+  if [[ "$dv1" != "$dv0" ]]; then
     echo 'CPF inválido' >&2
     return 1
   fi
@@ -244,7 +244,7 @@ function cnpj_validar() {
   dv0=${1:12:2}
   dv1=$(cnpj_dv "$nd")
 
-  if test "$dv1" != "$dv0"; then
+  if [[ "$dv1" != "$dv0" ]]; then
     echo 'CNPJ inválido' >&2
     return 1
   fi
